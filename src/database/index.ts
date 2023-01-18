@@ -1,3 +1,15 @@
-import { createConnection } from 'typeorm';
+import { Connection, createConnection, getConnectionOptions } from 'typeorm';
 
-(async () => await createConnection())();
+interface IOptions {
+  host: string;
+}
+
+export default async function (host: string = 'database_finapi'): Promise<Connection> {
+  const defaultOptions = await getConnectionOptions()
+
+  return createConnection(
+    Object.assign(defaultOptions, {
+      host,
+    })
+  )
+}
