@@ -3,7 +3,6 @@ import { app } from '../../../../app'
 
 import createConnection from '../../../../database'
 import { Connection } from 'typeorm'
-import { hash } from 'bcryptjs'
 
 let connection: Connection
 
