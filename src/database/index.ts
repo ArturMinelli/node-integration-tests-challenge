@@ -4,7 +4,7 @@ interface IOptions {
   host: string;
 }
 
-export default async function (host: string = 'database_finapi'): Promise<Connection> {
+export default async function (host: string = 'localhost'): Promise<Connection> {
   const defaultOptions = await getConnectionOptions()
 
   return createConnection(

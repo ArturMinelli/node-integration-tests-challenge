@@ -4,7 +4,7 @@
 
   "name": "default",
   "type": "postgres",
-  "host": "database_finapi",
+  "host": "localhost",
   "port": 5432,
   "database": "finapi",
   "entities": [

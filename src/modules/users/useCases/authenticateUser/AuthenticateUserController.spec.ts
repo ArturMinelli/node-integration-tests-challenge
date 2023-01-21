@@ -18,7 +18,7 @@ interface IRequest {
 describe("Authenticate User", () => {
 
   beforeAll(async () => {
-    connection = await createConnection('localhost')
+    connection = await createConnection()
     await connection.runMigrations()
   })
 
