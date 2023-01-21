@@ -1,5 +1,6 @@
 import request from 'supertest'
 import { app } from '../../../../app'
+import { v4 as uuidv4 } from 'uuid'
 
 import createConnection from '../../../../database'
 import { Connection } from 'typeorm'
@@ -37,7 +38,7 @@ describe("Get Balance", () => {
     await connection.close()
   })
 
-  it('should be able to get the balance of an account', async () => {
+  it('should be able to get a statement operation from a given user', async () => {
     const authenticationResponse = await request(app).post('/api/v1/sessions')
       .send({
         email,
@@ -46,25 +47,38 @@ describe("Get Balance", () => {
 
     const { token } = authenticationResponse.body
 
-    const balanceResponse = await request(app).get('/api/v1/statements/balance')
+    const depositResponse = await request(app).post('/api/v1/statements/deposit')
+      .send({
+        amount: 1,
+        description: 'Won the lottery'
+      })
       .set('Authorization', `Bearer ${token}`)
 
-    expect(balanceResponse.statusCode).toBe(200)
+    const { id } = depositResponse.body
+
+    const statementOperationResponse = await request(app).get(`/api/v1/statements/${id}`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(statementOperationResponse.statusCode).toBe(200)
   })
 
   it('should not be able to get the balance of an account if authentication token is missing', async () => {
-    const balanceResponse = await request(app).get('/api/v1/statements/balance')
+    const fakeStatementId = uuidv4()
 
-    expect(balanceResponse.statusCode).toBe(401)
+    const statementOperationResponse = await request(app).get(`/api/v1/statements/${fakeStatementId}`)
+
+    expect(statementOperationResponse.statusCode).toBe(401)
   })
 
   it('should not be able to get the balance of an account if authentication token is invalid', async () => {
     const token = 'token_that_will_not_work'
 
-    const balanceResponse = await request(app).get('/api/v1/statements/balance')
+    const fakeStatementId = uuidv4()
+
+    const statementOperationResponse = await request(app).get(`/api/v1/statements/${fakeStatementId}`)
       .set('Authorization', `Bearer ${token}`)
 
-    expect(balanceResponse.statusCode).toBe(401)
+    expect(statementOperationResponse.statusCode).toBe(401)
   })
 
   it('should not be able to get the balance of an account if user does not exist', async () => {
@@ -72,6 +86,30 @@ describe("Get Balance", () => {
       .set('Authorization', `Bearer ${fakeUserToken}`)
 
     expect(balanceResponse.statusCode).toBe(404)
+  })
+
+  it('should not be able to get a statement operation if it does not exist', async () => {
+    const authenticationResponse = await request(app).post('/api/v1/sessions')
+      .send({
+        email,
+        password
+      })
+
+    const { token } = authenticationResponse.body
+
+    await request(app).post('/api/v1/statements/deposit')
+      .send({
+        amount: 1,
+        description: 'Won the lottery'
+      })
+      .set('Authorization', `Bearer ${token}`)
+
+    const fakeStatementId = uuidv4()
+
+    const statementOperationResponse = await request(app).get(`/api/v1/statements/${fakeStatementId}`)
+      .set('Authorization', `Bearer ${token}`)
+
+    expect(statementOperationResponse.statusCode).toBe(404)
   })
 
 })
