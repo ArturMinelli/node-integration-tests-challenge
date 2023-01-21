@@ -6,10 +6,10 @@ import { Connection } from 'typeorm'
 
 let connection: Connection
 
-describe("Create Category Controller", () => {
+describe("Create User", () => {
 
   beforeAll(async () => {
-    connection = await createConnection('localhost')
+    connection = await createConnection()
     await connection.runMigrations()
   })
 
